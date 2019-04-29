@@ -67,6 +67,11 @@ namespace SonarAnalyzer.Helpers
                 invocation.ArgumentList.Arguments.Count == count;
         }
 
+        public static ExpressionSyntax Get(this ArgumentListSyntax argumentList, int index) =>
+            argumentList != null && argumentList.Arguments.Count > index
+                ? argumentList.Arguments[index].Expression.RemoveParentheses()
+                : null;
+
         public static SyntaxNode RemoveParentheses(this SyntaxNode expression)
         {
             var currentExpression = expression;
@@ -246,6 +251,11 @@ namespace SonarAnalyzer.Helpers
                     return null;
             }
         }
+
+        public static bool IsMethodInvocation(this InvocationExpressionSyntax expression, KnownType type, string methodName, SemanticModel semanticModel) =>
+            semanticModel.GetSymbolInfo(expression).Symbol is IMethodSymbol methodSymbol &&
+            methodSymbol.IsInType(type) &&
+            methodName.Contains(methodSymbol.Name);
 
         public static Location FindIdentifierLocation(this BaseMethodDeclarationSyntax methodDeclaration) =>
             GetIdentifierOrDefault(methodDeclaration)?.GetLocation();
